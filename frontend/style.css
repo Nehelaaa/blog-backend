@@ -239,3 +239,32 @@
     font-size: 16px;
     margin-left: 5px;
 }
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 36px;
+    }
+
+    .hero p {
+        font-size: 18px;
+    }
+
+    .navbar .brand {
+        font-size: 24px;
+    }
+
+    .navbar .menu {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #posts-container {
+        padding: 10px;
+        margin: 20px auto;
+    }
+
+    .post {
+        padding: 15px;
+    }
+}
