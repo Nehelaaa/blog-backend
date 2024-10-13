@@ -14,6 +14,7 @@
             <h1 class="brand">Donia Travels</h1>
             <!-- Profile/Login Button -->
             <div class="profile-login">
+                <i class="fa-solid fa-user" id="profile-icon"></i> <!-- Profile icon -->
                 <button id="login-btn">Login</button>  <!-- Initially shows login button -->
                 <button id="logout-btn" style="display: none;">Logout</button> <!-- Hidden until login -->
             </div>
@@ -49,7 +50,7 @@
     <!-- Blog Section -->
     <section id="blog" class="container section">
         <h2>My Blog Posts</h2>
-        <!-- Form to add a new blog post - Hidden for public users -->
+        <!-- Form to add a new blog post - Initially hidden for public users -->
         <div id="new-post" style="display: none;">
             <form id="blog-form" enctype="multipart/form-data">
                 <input type="text" id="blog-title" placeholder="Blog Title" required>
