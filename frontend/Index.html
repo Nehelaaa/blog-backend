@@ -14,9 +14,7 @@
             <h1 class="brand">Donia Travels</h1>
             <!-- Profile/Login Button -->
             <div class="profile-login">
-                <i class="fa-solid fa-user" id="profile-icon"></i> <!-- Profile icon -->
-                <button id="login-btn">Login</button>  <!-- Initially shows login button -->
-                <button id="logout-btn" style="display: none;">Logout</button> <!-- Hidden until login -->
+                <i id="profile-icon" class="fas fa-user-circle fa-2x"></i> <!-- Profile icon for login -->
             </div>
             <div class="hamburger">
                 <div></div>
@@ -50,13 +48,13 @@
     <!-- Blog Section -->
     <section id="blog" class="container section">
         <h2>My Blog Posts</h2>
-        <!-- Form to add a new blog post - Initially hidden for public users -->
+        <!-- Form to add a new blog post - Hidden for public users -->
         <div id="new-post" style="display: none;">
             <form id="blog-form" enctype="multipart/form-data">
                 <input type="text" id="blog-title" placeholder="Blog Title" required>
                 <textarea id="blog-content" rows="5" placeholder="Write about your experience..." required></textarea>
                 <input type="file" id="blog-image" accept="image/*">
-                <button type="submit" id="submit-button">Add Post</button> <!-- Ensure this button is visible and clickable only for Donia -->
+                <button type="submit" id="submit-button" class="pink-button">Add Post</button> <!-- Ensure this button is visible and clickable only for Donia -->
             </form>
         </div>
 
@@ -76,6 +74,17 @@
             <button type="submit">Send Message</button>
         </form>
     </section>
+
+    <!-- Modal for Login -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Login</h3>
+            <input type="text" id="modal-username" placeholder="Username">
+            <input type="password" id="modal-password" placeholder="Password">
+            <button id="login-submit" class="pink-button">Login</button> <!-- Pink button -->
+        </div>
+    </div>
 
     <!-- Add external script -->
     <script src="script.js"></script>
