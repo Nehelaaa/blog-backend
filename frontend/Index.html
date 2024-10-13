@@ -1,7 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donia Awadallah's Blog</title>
     <link rel="stylesheet" href="style.css">
@@ -17,9 +13,16 @@
                 <li><a href="#about">About Me</a></li>
                 <li><a href="#blog">Blog</a></li>
                 <li><a href="#contact">Contact</a></li>
-                <!-- Profile Icon moved to the right -->
-                <li><i id="profile-icon" class="fas fa-user-circle fa-2x"></i> <!-- Profile icon for login --> </li>
+                <!-- Profile Icon moved to the right after contact link -->
+                <li class="profile-login">
+                    <i id="profile-icon" class="fas fa-user-circle fa-2x"></i> <!-- Profile icon for login -->
+                </li>
             </ul>
+            <div class="hamburger">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </div>
     </nav>
 
@@ -74,7 +77,7 @@
             <span class="close">&times;</span>
             <h3>Login</h3>
             <input type="text" id="modal-username" placeholder="Username">
-            <input type="password" id="modal-password" placeholder="Password">
+            <input type="password" id="modal-password" placeholder="Password" onkeydown="if(event.key === 'Enter'){document.getElementById('login-submit').click()}"> <!-- Password input with hidden feature -->
             <button id="login-submit" class="pink-button">Login</button> <!-- Pink button for login -->
         </div>
     </div>
