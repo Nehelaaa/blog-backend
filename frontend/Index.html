@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donia Awadallah's Blog</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="brand">Donia Travels</h1>
+            <ul class="menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About Me</a></li>
+                <li><a href="#blog">Blog</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Banner Section -->
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <h1>Explore the World with Me</h1>
+            <p>Follow my adventures as I travel to the most beautiful places around the globe!</p>
+            <a href="#blog" class="cta-button">Read the Blog</a>
+        </div>
+    </section>
+
+    <!-- About Me Section -->
+    <section id="about" class="container section">
+        <h2>About Me</h2>
+        <p>Hi! I'm Donia Awadallah, a passionate traveler who loves to share experiences and tips about the places I visit. Follow my adventures as I travel around the globe and document every moment!</p>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="container section">
+        <h2>My Blog Posts</h2>
+        <!-- Form to add a new blog post -->
+        <div id="new-post">
+            <form id="blog-form">
+                <input type="text" id="blog-title" placeholder="Blog Title" required>
+                <textarea id="blog-content" rows="5" placeholder="Write about your experience..." required></textarea>
+                <input type="file" id="blog-image" accept="image/*">
+                <button type="submit">Add Post</button>
+            </form>
+        </div>
+        <!-- Section to display blog posts -->
+        <div id="posts-container">
+            <!-- Blog posts will appear here -->
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="container section">
+        <h2>Contact Me</h2>
+        <form id="contact-form">
+            <input type="text" id="contact-name" placeholder="Your Name" required>
+            <input type="email" id="contact-email" placeholder="Your Email" required>
+            <textarea id="contact-message" rows="5" placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

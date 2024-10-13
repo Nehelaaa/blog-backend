@@ -1,0 +1,241 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Color Variables */
+:root {
+    --primary-color: #333; /* Dark color for text */
+    --secondary-color: #ff4081; /* Accent pink for buttons and links */
+    --background-light: #f7f8fa; /* Light gray background */
+    --white: #fff;
+}
+
+/* Navigation Bar */
+.navbar {
+    background-color: var(--white);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px 0;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .brand {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.navbar .menu {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.navbar .menu a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 10px 15px;
+}
+
+.navbar .menu a:hover {
+    color: var(--secondary-color);
+}
+
+.hero {
+    background: url('https://assets.onecompiler.app/42ubzb7su/42ubxcwew/haydon-sn_GTCzcBqo-unsplash.jpg') no-repeat center center/cover;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+    padding: 0 20px;
+}
+
+.hero-content {
+    max-width: 800px;
+}
+
+.hero h1 {
+    font-size: 56px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.hero p {
+    font-size: 22px;
+    margin-bottom: 30px;
+}
+
+.cta-button {
+    padding: 12px 30px;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    font-size: 16px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #e73370;
+}
+
+/* General Section Styling */
+.section {
+    padding: 80px 20px;
+    text-align: center;
+    background-color: var(--background-light);
+    margin-top: 50px;
+}
+
+.section h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.section p {
+    font-size: 18px;
+    max-width: 800px;
+    margin: auto;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* Form Styling */
+#blog-form, #contact-form {
+    max-width: 700px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+#blog-form input, #blog-form textarea, #contact-form input, #contact-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+}
+
+#blog-form button, #contact-form button {
+    padding: 12px 25px;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#blog-form button:hover, #contact-form button:hover {
+    background-color: #e73370;
+}
+
+/* Blog Post Styling */
+#posts-container {
+    max-width: 700px;
+    margin: 40px auto;
+    display: grid;
+    gap: 20px;
+}
+
+.post {
+    background-color: var(--white);
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: left;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    padding-bottom: 60px; /* Space for the action buttons */
+}
+
+.post-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.post-content {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+/* Styling for Post Image */
+.post-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+
+/* Post Actions Styling */
+.post-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+}
+
+.post-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.post-actions .delete-icon,
+.post-actions .edit-icon,
+.post-actions .like-icon {
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+.post-actions .like-icon.liked {
+    color: #007bff; /* Blue color when liked */
+}
+
+.post-actions .delete-icon:hover {
+    color: #dc3545;
+}
+
+.post-actions .edit-icon:hover {
+    color: #ffc107;
+}
+
+.post-actions .like-icon:hover {
+    color: var(--secondary-color);
+}
+
+.post-actions .like-counter {
+    font-size: 16px;
+    margin-left: 5px;
+}
