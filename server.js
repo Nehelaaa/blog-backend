@@ -4,18 +4,25 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Ensure the 'uploads' directory exists
+const uploadsDir = 'uploads';
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
+
 // Storage configuration for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/');
+        cb(null, uploadsDir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique file name
     }
 });
 
@@ -37,7 +44,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 const postSchema = new mongoose.Schema({
     title: { type: String, required: true },
     content: { type: String, required: true },
-    image: { type: String },
+    image: { type: String },  // Store image path relative to '/uploads/'
     likes: { type: Number, default: 0 },
     comments: [{ username: String, text: String }]
 });
@@ -51,7 +58,7 @@ app.post('/posts', upload.single('image'), async (req, res) => {
         const newPost = new Post({
             title: req.body.title,
             content: req.body.content,
-            image: req.file ? req.file.path : null
+            image: req.file ? `/uploads/${req.file.filename}` : null  // Store relative path
         });
         await newPost.save();
         res.status(201).json(newPost);
@@ -93,7 +100,7 @@ app.post('/posts/:id/comment', async (req, res) => {
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
         
-        post.comments.push(req.body);
+        post.comments.push(req.body);  // Add new comment
         await post.save();
         res.status(200).json(post);
     } catch (error) {
@@ -107,6 +114,14 @@ app.delete('/posts/:id', async (req, res) => {
     try {
         const post = await Post.findByIdAndDelete(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        // Delete image associated with the post if it exists
+        if (post.image) {
+            const imagePath = path.join(__dirname, post.image);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
         
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
