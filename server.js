@@ -2,10 +2,25 @@ require('dotenv').config();  // Load environment variables from .env
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Storage configuration for `multer`
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));  // e.g., 1619479123797.jpg
+    }
+});
+
+// Initialize multer with the defined storage
+const upload = multer({ storage: storage });
 
 // Connect to MongoDB using the connection string in .env
 mongoose.connect(process.env.MONGODB_URI, {
@@ -30,10 +45,14 @@ const postSchema = new mongoose.Schema({
 // Post model
 const Post = mongoose.model('Post', postSchema);
 
-// Create a new post
-app.post('/posts', async (req, res) => {
+// Create a new post with image upload
+app.post('/posts', upload.single('image'), async (req, res) => {
     try {
-        const newPost = new Post(req.body);
+        const newPost = new Post({
+            title: req.body.title,
+            content: req.body.content,
+            image: req.file ? req.file.path : null  // Save image path if file is uploaded
+        });
         await newPost.save();
         res.status(201).json(newPost);
     } catch (error) {
@@ -82,6 +101,9 @@ app.post('/posts/:id/comment', async (req, res) => {
         res.status(500).json({ error: 'Failed to add comment' });
     }
 });
+
+// Serve uploaded images statically
+app.use('/uploads', express.static('uploads'));
 
 // Start the server
 const PORT = process.env.PORT || 5000;
