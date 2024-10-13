@@ -138,6 +138,7 @@
     font-family: 'Arial', sans-serif;
 }
 
+/* Changes to Button Styling */
 #blog-form button, #contact-form button {
     padding: 12px 25px;
     background-color: var(--secondary-color);
@@ -148,6 +149,8 @@
     border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    z-index: 1; /* Ensure button is clickable */
+    position: relative; /* Ensure button is not overlapped */
 }
 
 #blog-form button:hover, #contact-form button:hover {
