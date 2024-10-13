@@ -6,8 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
     const newPostForm = document.getElementById('new-post');
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
+    const loginModal = document.getElementById('login-modal');
+    const loginSubmitBtn = document.getElementById('login-submit');
+    const profileIcon = document.getElementById('profile-icon');
+    const closeModal = document.querySelector('.close');
 
     let loggedIn = false;
 
@@ -17,10 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display posts from backend when the page loads
     fetchPosts();
 
-    // Login logic
-    loginBtn.addEventListener('click', async () => {
-        const username = prompt('Enter username');
-        const password = prompt('Enter password');
+    // Profile icon click opens login modal
+    profileIcon.addEventListener('click', () => {
+        loginModal.style.display = 'block';
+    });
+
+    // Close modal logic
+    closeModal.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+
+    // Login logic when login form is submitted
+    loginSubmitBtn.addEventListener('click', async () => {
+        const username = document.getElementById('modal-username').value;
+        const password = document.getElementById('modal-password').value;
 
         try {
             const response = await fetch(`${API_URL}/login`, {
@@ -33,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Login successful');
                 loggedIn = true;
                 toggleLoginState();
+                loginModal.style.display = 'none'; // Close the modal after login
             } else {
                 alert('Invalid username or password');
             }
@@ -41,23 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Logout logic
-    logoutBtn.addEventListener('click', () => {
-        loggedIn = false;
-        toggleLoginState();
-    });
-
     // Toggle between login and logout state
     function toggleLoginState() {
         if (loggedIn) {
             newPostForm.style.display = 'block'; // Show the post form for Donia
-            loginBtn.style.display = 'none';
-            logoutBtn.style.display = 'block';
             showEditAndDeleteButtons(); // Enable edit and delete buttons for logged-in user
         } else {
             newPostForm.style.display = 'none'; // Hide the post form for public
-            loginBtn.style.display = 'block';
-            logoutBtn.style.display = 'none';
             hideEditAndDeleteButtons(); // Disable edit and delete buttons for public users
         }
     }
