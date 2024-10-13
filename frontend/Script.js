@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'https://your-backend-url.com';  // Replace with your backend API URL
+    const API_URL = 'https://blog-backend-sdx3.onrender.com'; // Replace with your backend API URL
     const form = document.getElementById('blog-form');
     const titleInput = document.getElementById('blog-title');
     const contentInput = document.getElementById('blog-content');
@@ -26,6 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
 
+            if (!response.ok) {
+                throw new Error('Failed to create post');
+            }
+
             const newPost = await response.json();
             displayPost(newPost);
             clearForm();
@@ -38,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchPosts() {
         try {
             const response = await fetch(`${API_URL}/posts`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch posts');
+            }
             const posts = await response.json();
             posts.forEach(post => displayPost(post));
         } catch (error) {
@@ -47,6 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display a single post
     function displayPost(post) {
+        console.log('Displaying post:', post);  // Debugging: check post data
+
         const postDiv = document.createElement('div');
         postDiv.classList.add('post');
 
@@ -73,10 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteBtn.classList.add('delete-icon');
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
         deleteBtn.addEventListener('click', async () => {
+            console.log('Deleting post with ID:', post._id);
             try {
-                await fetch(`${API_URL}/posts/${post._id}`, {
+                const response = await fetch(`${API_URL}/posts/${post._id}`, {
                     method: 'DELETE'
                 });
+                if (!response.ok) {
+                    throw new Error('Failed to delete post');
+                }
                 postsContainer.removeChild(postDiv);
             } catch (error) {
                 console.error('Error deleting post:', error);
@@ -88,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editBtn.classList.add('edit-icon');
         editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
         editBtn.addEventListener('click', async () => {
+            console.log('Editing post with ID:', post._id);
             const updatedTitle = prompt('Edit the title:', post.title);
             const updatedContent = prompt('Edit the content:', post.content);
 
@@ -96,13 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 post.content = updatedContent;
 
                 try {
-                    await fetch(`${API_URL}/posts/${post._id}`, {
+                    const response = await fetch(`${API_URL}/posts/${post._id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ title: updatedTitle, content: updatedContent })
                     });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to update post');
+                    }
 
                     postTitle.textContent = post.title;
                     postContent.textContent = post.content;
@@ -124,10 +142,16 @@ document.addEventListener('DOMContentLoaded', () => {
         likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
 
         likeBtn.addEventListener('click', async () => {
+            console.log('Liking post with ID:', post._id);
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
                     method: 'POST'
                 });
+
+                if (!response.ok) {
+                    throw new Error('Failed to like post');
+                }
+
                 const updatedPost = await response.json();
                 post.likes = updatedPost.likes;
                 post.liked = !post.liked;
