@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
     const newPostForm = document.getElementById('new-post');
-    const profileIcon = document.getElementById('profile-icon'); // Ensure this ID matches HTML
+    const profileIcon = document.getElementById('profile-icon');
+    const loginModal = document.getElementById('login-modal');
+    const loginSubmitBtn = document.getElementById('login-submit');
     const logoutBtn = document.getElementById('logout-btn');
     let token = '';  // Store token or session
 
@@ -18,13 +20,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display posts from backend when the page loads
     fetchPosts();  // Ensure posts are fetched for everyone
 
-    // Login logic
+    // Profile Icon triggers login modal
     profileIcon.addEventListener('click', () => {
-        // Display modal to enter username and password
-        const username = prompt('Enter username');
-        const password = prompt('Enter password');
+        loginModal.style.display = 'block';
+    });
 
-        login(username, password);
+    // Close login modal
+    document.querySelector('.close').addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+
+    // Login logic
+    loginSubmitBtn.addEventListener('click', async () => {
+        const username = document.getElementById('modal-username').value;
+        const password = document.getElementById('modal-password').value;
+
+        await login(username, password);
+    });
+
+    // Trigger login on 'Enter' keypress in password field
+    document.getElementById('modal-password').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            loginSubmitBtn.click();
+        }
     });
 
     async function login(username, password) {
@@ -40,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 token = data.token;  // Store the token for further authenticated requests
                 alert('Login successful');
                 loggedIn = true;
+                loginModal.style.display = 'none';  // Hide login modal after successful login
                 toggleLoginState();
             } else {
                 alert('Invalid username or password');
@@ -64,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutBtn.style.display = 'block';   // Show logout button
             showEditAndDeleteButtons();  // Enable edit and delete buttons for logged-in user
         } else {
-            newPostForm.style.display = 'none';  // Hide the post form for public
+            newPostForm.style.display = 'none';  // Hide the post form for public users
             profileIcon.style.display = 'block';  // Show profile icon
             logoutBtn.style.display = 'none';     // Hide logout button
             hideEditAndDeleteButtons();  // Disable edit and delete buttons for public users
@@ -84,6 +103,36 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching posts:', error);
         }
     }
+
+    // Add post logic
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();  // Prevent the default form submission
+
+        const formData = new FormData();
+        formData.append('title', titleInput.value);
+        formData.append('content', contentInput.value);
+        formData.append('image', imageInput.files[0]);
+
+        try {
+            const response = await fetch(`${API_URL}/posts`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const newPost = await response.json();
+                displayPost(newPost);
+                form.reset();  // Clear the form after adding post
+            } else {
+                alert('Failed to add post');
+            }
+        } catch (error) {
+            console.error('Error adding post:', error);
+        }
+    });
 
     // Display a single post
     function displayPost(post) {
@@ -158,13 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
         postDiv.appendChild(postContent);
         postDiv.appendChild(actionsDiv);
         postsContainer.prepend(postDiv);
-    }
-
-    // Clear form inputs after submission
-    function clearForm() {
-        titleInput.value = '';
-        contentInput.value = '';
-        imageInput.value = '';
     }
 
     // Function to edit post (logic to be implemented)
