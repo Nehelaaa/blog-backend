@@ -62,6 +62,8 @@
     font-size: 24px;
     color: var(--primary-color);
     margin-right: 20px;
+    display: flex;
+    align-items: center;
 }
 
 /* Hero Banner */
