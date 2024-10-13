@@ -5,6 +5,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentInput = document.getElementById('blog-content');
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
+    
+    // Variables for authentication
+    let isAuthenticated = false;  // Will be set to true after successful login
+    let token = '';  // Store token after successful login
+
+    const loginModal = document.getElementById('login-modal');
+    const loginForm = document.getElementById('login-form');
+    const profileIcon = document.getElementById('profile-icon');
+    const closeModal = document.querySelector('.close');
+    const loginError = document.getElementById('login-error');
+
+    // Open the login modal when the profile icon is clicked
+    profileIcon.addEventListener('click', () => {
+        loginModal.style.display = 'block';
+    });
+
+    // Close the login modal
+    closeModal.addEventListener('click', () => {
+        loginModal.style.display = 'none';
+    });
+
+    // Form submission event for login
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            const response = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Invalid credentials');
+            }
+
+            const data = await response.json();
+            token = data.token;  // Store token for authenticated actions
+            isAuthenticated = true;
+
+            // Hide the login modal after successful login
+            loginModal.style.display = 'none';
+            loginError.style.display = 'none';
+        } catch (error) {
+            loginError.textContent = 'Invalid username or password';
+            loginError.style.display = 'block';
+        }
+    });
 
     // Fetch and display posts from the backend when the page loads
     fetchPosts();
@@ -12,6 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form submission event to create a new post
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
+
+        if (!isAuthenticated) {
+            alert('You must be logged in to create a post.');
+            return;
+        }
 
         const formData = new FormData();
         formData.append('title', titleInput.value);
@@ -23,7 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             if (!response.ok) {
@@ -68,63 +128,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if (post.image) {
             const postImage = document.createElement('img');
             postImage.classList.add('post-image');
-            postImage.src = `${API_URL}${post.image}`; // Fixed image URL path to display correctly
+            postImage.src = `${API_URL}/${post.image}`;
             postDiv.appendChild(postImage);
         }
 
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('post-actions');
 
-        // Delete button
-        const deleteBtn = document.createElement('button');
-        deleteBtn.classList.add('delete-icon');
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch(`${API_URL}/posts/${post._id}`, {
-                    method: 'DELETE'
-                });
-                if (!response.ok) {
-                    throw new Error('Failed to delete post');
-                }
-                postsContainer.removeChild(postDiv);
-            } catch (error) {
-                console.error('Error deleting post:', error);
-            }
-        });
-
-        // Edit button
-        const editBtn = document.createElement('button');
-        editBtn.classList.add('edit-icon');
-        editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        editBtn.addEventListener('click', async () => {
-            const updatedTitle = prompt('Edit the title:', post.title);
-            const updatedContent = prompt('Edit the content:', post.content);
-
-            if (updatedTitle !== null && updatedContent !== null) {
-                post.title = updatedTitle;
-                post.content = updatedContent;
-
+        // Allow delete/edit only if authenticated
+        if (isAuthenticated) {
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-icon');
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', async () => {
                 try {
                     const response = await fetch(`${API_URL}/posts/${post._id}`, {
-                        method: 'PUT',
+                        method: 'DELETE',
                         headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ title: updatedTitle, content: updatedContent })
+                            Authorization: `Bearer ${token}`
+                        }
                     });
-
                     if (!response.ok) {
-                        throw new Error('Failed to update post');
+                        throw new Error('Failed to delete post');
                     }
-
-                    postTitle.textContent = post.title;
-                    postContent.textContent = post.content;
+                    postsContainer.removeChild(postDiv);
                 } catch (error) {
-                    console.error('Error updating post:', error);
+                    console.error('Error deleting post:', error);
                 }
-            }
-        });
+            });
+
+            // Edit button
+            const editBtn = document.createElement('button');
+            editBtn.classList.add('edit-icon');
+            editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            editBtn.addEventListener('click', async () => {
+                const updatedTitle = prompt('Edit the title:', post.title);
+                const updatedContent = prompt('Edit the content:', post.content);
+
+                if (updatedTitle !== null && updatedContent !== null) {
+                    post.title = updatedTitle;
+                    post.content = updatedContent;
+
+                    try {
+                        const response = await fetch(`${API_URL}/posts/${post._id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ title: updatedTitle, content: updatedContent })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to update post');
+                        }
+
+                        postTitle.textContent = post.title;
+                        postContent.textContent = post.content;
+                    } catch (error) {
+                        console.error('Error updating post:', error);
+                    }
+                }
+            });
+
+            actionsDiv.appendChild(editBtn);
+            actionsDiv.appendChild(deleteBtn);
+        }
 
         // Like button
         const likeBtn = document.createElement('button');
@@ -224,8 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        actionsDiv.appendChild(editBtn);
-        actionsDiv.appendChild(deleteBtn);
         actionsDiv.appendChild(likeBtn);
         actionsDiv.appendChild(likeCounter);
         actionsDiv.appendChild(commentBtn);
