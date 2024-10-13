@@ -53,10 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
             newPostForm.style.display = 'block'; // Show the post form for Donia
             loginBtn.style.display = 'none';
             logoutBtn.style.display = 'block';
+            showEditAndDeleteButtons(); // Enable edit and delete buttons for logged-in user
         } else {
             newPostForm.style.display = 'none'; // Hide the post form for public
             loginBtn.style.display = 'block';
             logoutBtn.style.display = 'none';
+            hideEditAndDeleteButtons(); // Disable edit and delete buttons for public users
         }
     }
 
@@ -165,12 +167,25 @@ document.addEventListener('DOMContentLoaded', () => {
             commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none';  // Toggle visibility
         });
 
-        // Add comment logic and more actions
-        // ...
-
         actionsDiv.appendChild(likeBtn);
         actionsDiv.appendChild(likeCounter);
         actionsDiv.appendChild(commentBtn);
+
+        // Add edit and delete buttons for logged-in user
+        if (loggedIn) {
+            const editBtn = document.createElement('button');
+            editBtn.classList.add('edit-icon');
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.addEventListener('click', () => editPost(post._id)); // Edit post logic
+            actionsDiv.appendChild(editBtn);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-icon');
+            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.addEventListener('click', () => deletePost(post._id)); // Delete post logic
+            actionsDiv.appendChild(deleteBtn);
+        }
+
         postDiv.appendChild(postTitle);
         postDiv.appendChild(postContent);
         postDiv.appendChild(actionsDiv);
@@ -182,5 +197,45 @@ document.addEventListener('DOMContentLoaded', () => {
         titleInput.value = '';
         contentInput.value = '';
         imageInput.value = '';
+    }
+
+    // Function to edit post (logic to be implemented)
+    function editPost(postId) {
+        alert(`Edit post: ${postId}`);
+        // You can add the logic for fetching the post data and populating the form for editing.
+    }
+
+    // Function to delete post
+    async function deletePost(postId) {
+        try {
+            const response = await fetch(`${API_URL}/posts/${postId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete post');
+            }
+
+            alert('Post deleted successfully');
+            location.reload(); // Reload the page to refresh posts
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    }
+
+    // Show edit and delete buttons for logged-in users
+    function showEditAndDeleteButtons() {
+        const editIcons = document.querySelectorAll('.edit-icon');
+        const deleteIcons = document.querySelectorAll('.delete-icon');
+        editIcons.forEach(icon => icon.style.display = 'block');
+        deleteIcons.forEach(icon => icon.style.display = 'block');
+    }
+
+    // Hide edit and delete buttons for public users
+    function hideEditAndDeleteButtons() {
+        const editIcons = document.querySelectorAll('.edit-icon');
+        const deleteIcons = document.querySelectorAll('.delete-icon');
+        editIcons.forEach(icon => icon.style.display = 'none');
+        deleteIcons.forEach(icon => icon.style.display = 'none');
     }
 });
