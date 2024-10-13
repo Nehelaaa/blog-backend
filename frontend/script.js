@@ -6,9 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
 
-    // Check if the DOM content is loaded
-    console.log('DOM Content Loaded');
-
     // Fetch and display posts from backend when the page loads
     fetchPosts();
 
@@ -16,16 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        console.log('Form submitted');
-
         const formData = new FormData();
         formData.append('title', titleInput.value);
         formData.append('content', contentInput.value);
         if (imageInput.files.length > 0) {
             formData.append('image', imageInput.files[0]);
         }
-
-        console.log('Form data:', formData);
 
         try {
             const response = await fetch(`${API_URL}/posts`, {
@@ -38,8 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const newPost = await response.json();
-            console.log('Post created:', newPost);
-
             displayPost(newPost);
             clearForm();
         } catch (error) {
@@ -55,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to fetch posts');
             }
             const posts = await response.json();
-            console.log('Posts fetched:', posts);
             posts.forEach(post => displayPost(post));
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -85,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('post-actions');
 
+        // Delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('delete-icon');
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
@@ -102,79 +93,86 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        const editBtn = document.createElement('button');
-        editBtn.classList.add('edit-icon');
-        editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        editBtn.addEventListener('click', async () => {
-            const updatedTitle = prompt('Edit the title:', post.title);
-            const updatedContent = prompt('Edit the content:', post.content);
-
-            if (updatedTitle !== null && updatedContent !== null) {
-                post.title = updatedTitle;
-                post.content = updatedContent;
-
-                try {
-                    const response = await fetch(`${API_URL}/posts/${post._id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ title: updatedTitle, content: updatedContent })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to update post');
-                    }
-
-                    postTitle.textContent = post.title;
-                    postContent.textContent = post.content;
-                } catch (error) {
-                    console.error('Error updating post:', error);
-                }
-            }
+        // Add a "View Comments" button
+        const viewCommentsBtn = document.createElement('button');
+        viewCommentsBtn.textContent = 'View Comments';
+        viewCommentsBtn.addEventListener('click', () => {
+            showCommentsOverlay(post);
         });
 
-        const likeBtn = document.createElement('button');
-        likeBtn.classList.add('like-icon');
-        likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
-        if (post.liked) {
-            likeBtn.classList.add('liked');
-        }
-        const likeCounter = document.createElement('span');
-        likeCounter.classList.add('like-counter');
-        likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
-
-        likeBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
-                    method: 'POST'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to like post');
-                }
-
-                const updatedPost = await response.json();
-                post.likes = updatedPost.likes;
-                post.liked = !post.liked;
-
-                likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
-                likeBtn.classList.toggle('liked');
-            } catch (error) {
-                console.error('Error liking post:', error);
-            }
-        });
-
-        actionsDiv.appendChild(editBtn);
         actionsDiv.appendChild(deleteBtn);
-        actionsDiv.appendChild(likeBtn);
-        actionsDiv.appendChild(likeCounter);
+        actionsDiv.appendChild(viewCommentsBtn);
 
         postDiv.appendChild(postTitle);
         postDiv.appendChild(postContent);
         postDiv.appendChild(actionsDiv);
 
         postsContainer.prepend(postDiv);
+    }
+
+    // Show an overlay for comments
+    function showCommentsOverlay(post) {
+        const overlay = document.createElement('div');
+        overlay.classList.add('overlay');
+
+        const postTitle = document.createElement('h3');
+        postTitle.textContent = post.title;
+
+        const postContent = document.createElement('p');
+        postContent.textContent = post.content;
+
+        const commentsDiv = document.createElement('div');
+        commentsDiv.classList.add('comments');
+        post.comments.forEach(comment => {
+            const commentElement = document.createElement('p');
+            commentElement.textContent = `${comment.username}: ${comment.text}`;
+            commentsDiv.appendChild(commentElement);
+        });
+
+        const addCommentInput = document.createElement('input');
+        addCommentInput.placeholder = 'Leave a comment';
+
+        const submitCommentBtn = document.createElement('button');
+        submitCommentBtn.textContent = 'Submit';
+        submitCommentBtn.addEventListener('click', async () => {
+            const newComment = { username: 'Guest', text: addCommentInput.value };
+            try {
+                const response = await fetch(`${API_URL}/posts/${post._id}/comment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newComment)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add comment');
+                }
+
+                const updatedPost = await response.json();
+                commentsDiv.innerHTML = '';
+                updatedPost.comments.forEach(comment => {
+                    const commentElement = document.createElement('p');
+                    commentElement.textContent = `${comment.username}: ${comment.text}`;
+                    commentsDiv.appendChild(commentElement);
+                });
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
+        });
+
+        overlay.appendChild(postTitle);
+        overlay.appendChild(postContent);
+        overlay.appendChild(commentsDiv);
+        overlay.appendChild(addCommentInput);
+        overlay.appendChild(submitCommentBtn);
+
+        document.body.appendChild(overlay);
+
+        // Close overlay when clicked outside
+        overlay.addEventListener('click', () => {
+            overlay.remove();
+        });
     }
 
     // Clear form inputs after submission
