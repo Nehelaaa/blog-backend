@@ -5,70 +5,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentInput = document.getElementById('blog-content');
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
-    
-    // Variables for authentication
-    let isAuthenticated = false;  // Will be set to true after successful login
-    let token = '';  // Store token after successful login
+    const newPostForm = document.getElementById('new-post');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
 
-    const loginModal = document.getElementById('login-modal');
-    const loginForm = document.getElementById('login-form');
-    const profileIcon = document.getElementById('profile-icon');
-    const closeModal = document.querySelector('.close');
-    const loginError = document.getElementById('login-error');
+    let loggedIn = false;
 
-    // Open the login modal when the profile icon is clicked
-    profileIcon.addEventListener('click', () => {
-        loginModal.style.display = 'block';
-    });
+    // Hide posting form initially for public users
+    newPostForm.style.display = 'none';
 
-    // Close the login modal
-    closeModal.addEventListener('click', () => {
-        loginModal.style.display = 'none';
-    });
+    // Fetch and display posts from backend when the page loads
+    fetchPosts();
 
-    // Form submission event for login
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
+    // Login logic
+    loginBtn.addEventListener('click', async () => {
+        const username = prompt('Enter username');
+        const password = prompt('Enter password');
 
         try {
             const response = await fetch(`${API_URL}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             });
 
-            if (!response.ok) {
-                throw new Error('Invalid credentials');
+            if (response.ok) {
+                alert('Login successful');
+                loggedIn = true;
+                toggleLoginState();
+            } else {
+                alert('Invalid username or password');
             }
-
-            const data = await response.json();
-            token = data.token;  // Store token for authenticated actions
-            isAuthenticated = true;
-
-            // Hide the login modal after successful login
-            loginModal.style.display = 'none';
-            loginError.style.display = 'none';
         } catch (error) {
-            loginError.textContent = 'Invalid username or password';
-            loginError.style.display = 'block';
+            console.error('Error during login:', error);
         }
     });
 
-    // Fetch and display posts from the backend when the page loads
-    fetchPosts();
+    // Logout logic
+    logoutBtn.addEventListener('click', () => {
+        loggedIn = false;
+        toggleLoginState();
+    });
+
+    // Toggle between login and logout state
+    function toggleLoginState() {
+        if (loggedIn) {
+            newPostForm.style.display = 'block'; // Show the post form for Donia
+            loginBtn.style.display = 'none';
+            logoutBtn.style.display = 'block';
+        } else {
+            newPostForm.style.display = 'none'; // Hide the post form for public
+            loginBtn.style.display = 'block';
+            logoutBtn.style.display = 'none';
+        }
+    }
 
     // Form submission event to create a new post
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
-
-        if (!isAuthenticated) {
-            alert('You must be logged in to create a post.');
-            return;
-        }
 
         const formData = new FormData();
         formData.append('title', titleInput.value);
@@ -80,10 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
-                body: formData,
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                body: formData
             });
 
             if (!response.ok) {
@@ -135,74 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('post-actions');
 
-        // Allow delete/edit only if authenticated
-        if (isAuthenticated) {
-            // Delete button
-            const deleteBtn = document.createElement('button');
-            deleteBtn.classList.add('delete-icon');
-            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteBtn.addEventListener('click', async () => {
-                try {
-                    const response = await fetch(`${API_URL}/posts/${post._id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    });
-                    if (!response.ok) {
-                        throw new Error('Failed to delete post');
-                    }
-                    postsContainer.removeChild(postDiv);
-                } catch (error) {
-                    console.error('Error deleting post:', error);
-                }
-            });
-
-            // Edit button
-            const editBtn = document.createElement('button');
-            editBtn.classList.add('edit-icon');
-            editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-            editBtn.addEventListener('click', async () => {
-                const updatedTitle = prompt('Edit the title:', post.title);
-                const updatedContent = prompt('Edit the content:', post.content);
-
-                if (updatedTitle !== null && updatedContent !== null) {
-                    post.title = updatedTitle;
-                    post.content = updatedContent;
-
-                    try {
-                        const response = await fetch(`${API_URL}/posts/${post._id}`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `Bearer ${token}`
-                            },
-                            body: JSON.stringify({ title: updatedTitle, content: updatedContent })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to update post');
-                        }
-
-                        postTitle.textContent = post.title;
-                        postContent.textContent = post.content;
-                    } catch (error) {
-                        console.error('Error updating post:', error);
-                    }
-                }
-            });
-
-            actionsDiv.appendChild(editBtn);
-            actionsDiv.appendChild(deleteBtn);
-        }
-
         // Like button
         const likeBtn = document.createElement('button');
         likeBtn.classList.add('like-icon');
         likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
-        if (post.liked) {
-            likeBtn.classList.add('liked');
-        }
         const likeCounter = document.createElement('span');
         likeCounter.classList.add('like-counter');
         likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
@@ -219,8 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const updatedPost = await response.json();
                 post.likes = updatedPost.likes;
-                post.liked = !post.liked;
-
                 likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
                 likeBtn.classList.toggle('liked');
             } catch (error) {
@@ -240,71 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
             commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none';  // Toggle visibility
         });
 
-        // Fetch and display comments
-        async function fetchComments() {
-            try {
-                post.comments.forEach(comment => {
-                    const commentDiv = document.createElement('div');
-                    commentDiv.classList.add('comment');
-                    commentDiv.innerHTML = `<strong>${comment.username}:</strong> ${comment.text}`;
-                    commentsDiv.appendChild(commentDiv);
-                });
-            } catch (error) {
-                console.error('Error fetching comments:', error);
-            }
-        }
-
-        fetchComments();
-
-        // Add the comment input
-        const commentInput = document.createElement('input');
-        commentInput.type = 'text';
-        commentInput.placeholder = 'Leave a comment...';
-        const commentSubmitBtn = document.createElement('button');
-        commentSubmitBtn.textContent = 'Comment';
-
-        commentSubmitBtn.addEventListener('click', async () => {
-            const commentText = commentInput.value;
-            if (!commentText) return;
-
-            try {
-                const response = await fetch(`${API_URL}/posts/${post._id}/comment`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username: 'Anonymous', text: commentText })  // You can replace with real username logic
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to add comment');
-                }
-
-                const updatedPost = await response.json();
-                post.comments = updatedPost.comments;
-
-                // Add new comment to the commentsDiv
-                const newCommentDiv = document.createElement('div');
-                newCommentDiv.classList.add('comment');
-                newCommentDiv.innerHTML = `<strong>Anonymous:</strong> ${commentText}`;
-                commentsDiv.appendChild(newCommentDiv);
-                commentInput.value = '';  // Clear input
-            } catch (error) {
-                console.error('Error adding comment:', error);
-            }
-        });
+        // Add comment logic and more actions
+        // ...
 
         actionsDiv.appendChild(likeBtn);
         actionsDiv.appendChild(likeCounter);
         actionsDiv.appendChild(commentBtn);
-
         postDiv.appendChild(postTitle);
         postDiv.appendChild(postContent);
         postDiv.appendChild(actionsDiv);
-        postDiv.appendChild(commentsDiv);
-        postDiv.appendChild(commentInput);
-        postDiv.appendChild(commentSubmitBtn);
-
         postsContainer.prepend(postDiv);
     }
 
