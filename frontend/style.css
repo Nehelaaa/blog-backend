@@ -8,9 +8,9 @@
 
 /* Color Variables */
 :root {
-    --primary-color: #333; /* Dark color for text */
-    --secondary-color: #ff4081; /* Accent pink for buttons and links */
-    --background-light: #f7f8fa; /* Light gray background */
+    --primary-color: #333;
+    --secondary-color: #ff4081;
+    --background-light: #f7f8fa;
     --white: #fff;
 }
 
@@ -138,7 +138,6 @@
     font-family: 'Arial', sans-serif;
 }
 
-/* Changes to Button Styling */
 #blog-form button, #contact-form button {
     padding: 12px 25px;
     background-color: var(--secondary-color);
@@ -149,8 +148,6 @@
     border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    z-index: 1; /* Ensure button is clickable */
-    position: relative; /* Ensure button is not overlapped */
 }
 
 #blog-form button:hover, #contact-form button:hover {
@@ -241,6 +238,18 @@
 .post-actions .like-counter {
     font-size: 16px;
     margin-left: 5px;
+}
+
+/* Comment Section */
+.comments-section {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.comment {
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
 /* RESPONSIVE DESIGN */
