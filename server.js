@@ -4,10 +4,27 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const session = require('express-session');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Initialize session middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'supersecretkey',
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Middleware to check if the user is authenticated
+function isAuthenticated(req, res, next) {
+    if (req.session && req.session.user) {
+        return next();  // Proceed if authenticated
+    } else {
+        return res.status(401).json({ error: 'Unauthorized' });  // Unauthorized error if not logged in
+    }
+}
 
 // Storage configuration for multer
 const storage = multer.diskStorage({
@@ -45,8 +62,8 @@ const postSchema = new mongoose.Schema({
 // Post model
 const Post = mongoose.model('Post', postSchema);
 
-// Create a new post with image upload
-app.post('/posts', upload.single('image'), async (req, res) => {
+// Create a new post with image upload (only accessible to authenticated users)
+app.post('/posts', isAuthenticated, upload.single('image'), async (req, res) => {
     try {
         const newPost = new Post({
             title: req.body.title,
@@ -61,7 +78,7 @@ app.post('/posts', upload.single('image'), async (req, res) => {
     }
 });
 
-// Get all posts
+// Get all posts (public)
 app.get('/posts', async (req, res) => {
     try {
         const posts = await Post.find();
@@ -72,7 +89,7 @@ app.get('/posts', async (req, res) => {
     }
 });
 
-// Like a post
+// Like a post (public)
 app.post('/posts/:id/like', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -87,7 +104,7 @@ app.post('/posts/:id/like', async (req, res) => {
     }
 });
 
-// Comment on a post
+// Comment on a post (public)
 app.post('/posts/:id/comment', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -102,8 +119,25 @@ app.post('/posts/:id/comment', async (req, res) => {
     }
 });
 
-// Delete a post
-app.delete('/posts/:id', async (req, res) => {
+// Edit a post (only accessible to authenticated users)
+app.put('/posts/:id', isAuthenticated, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+
+        post.title = req.body.title || post.title;
+        post.content = req.body.content || post.content;
+
+        await post.save();
+        res.status(200).json(post);
+    } catch (error) {
+        console.error('Error updating post:', error);
+        res.status(500).json({ error: 'Failed to update post' });
+    }
+});
+
+// Delete a post (only accessible to authenticated users)
+app.delete('/posts/:id', isAuthenticated, async (req, res) => {
     try {
         const post = await Post.findByIdAndDelete(req.params.id);
         if (!post) return res.status(404).json({ error: 'Post not found' });
@@ -127,6 +161,7 @@ app.post('/login', (req, res) => {
     const hardcodedPassword = 'securepassword';
 
     if (username === hardcodedUsername && password === hardcodedPassword) {
+        req.session.user = username;  // Store the username in session
         return res.status(200).json({ message: 'Login successful' });
     } else {
         return res.status(401).json({ message: 'Invalid username or password' });
