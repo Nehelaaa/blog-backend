@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
 
-    // Fetch and display posts from backend when the page loads
+    // Fetch and display posts from the backend when the page loads
     fetchPosts();
 
     // Form submission event to create a new post
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (post.image) {
             const postImage = document.createElement('img');
             postImage.classList.add('post-image');
-            postImage.src = `${API_URL}/${post.image}`;
+            postImage.src = `${API_URL}${post.image}`; // Fixed image URL path to display correctly
             postDiv.appendChild(postImage);
         }
 
