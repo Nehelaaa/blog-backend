@@ -1,47 +1,51 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const API_URL = 'https://your-backend-url.com';  // Replace with your backend API URL
     const form = document.getElementById('blog-form');
     const titleInput = document.getElementById('blog-title');
     const contentInput = document.getElementById('blog-content');
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
 
-    const savedPosts = JSON.parse(localStorage.getItem('blogPosts')) || [];
-    savedPosts.forEach(post => displayPost(post));
+    // Fetch and display posts from backend when the page loads
+    fetchPosts();
 
-    form.addEventListener('submit', (event) => {
+    // Form submission event to create a new post
+    form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        const formData = new FormData();
+        formData.append('title', titleInput.value);
+        formData.append('content', contentInput.value);
         if (imageInput.files.length > 0) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const newPost = {
-                    id: Date.now(),
-                    title: titleInput.value,
-                    content: contentInput.value,
-                    image: reader.result,
-                    likes: 0
-                };
-                savedPosts.push(newPost);
-                localStorage.setItem('blogPosts', JSON.stringify(savedPosts));
-                displayPost(newPost);
-                clearForm();
-            };
-            reader.readAsDataURL(imageInput.files[0]);
-        } else {
-            const newPost = {
-                id: Date.now(),
-                title: titleInput.value,
-                content: contentInput.value,
-                image: null,
-                likes: 0
-            };
-            savedPosts.push(newPost);
-            localStorage.setItem('blogPosts', JSON.stringify(savedPosts));
+            formData.append('image', imageInput.files[0]);
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/posts`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const newPost = await response.json();
             displayPost(newPost);
             clearForm();
+        } catch (error) {
+            console.error('Error creating post:', error);
         }
     });
 
+    // Fetch posts from the backend and display them
+    async function fetchPosts() {
+        try {
+            const response = await fetch(`${API_URL}/posts`);
+            const posts = await response.json();
+            posts.forEach(post => displayPost(post));
+        } catch (error) {
+            console.error('Error fetching posts:', error);
+        }
+    }
+
+    // Display a single post
     function displayPost(post) {
         const postDiv = document.createElement('div');
         postDiv.classList.add('post');
@@ -64,32 +68,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('post-actions');
 
+        // Delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('delete-icon');
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        deleteBtn.addEventListener('click', () => {
-            postsContainer.removeChild(postDiv);
-            const updatedPosts = savedPosts.filter(p => p.id !== post.id);
-            localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
+        deleteBtn.addEventListener('click', async () => {
+            try {
+                await fetch(`${API_URL}/posts/${post._id}`, {
+                    method: 'DELETE'
+                });
+                postsContainer.removeChild(postDiv);
+            } catch (error) {
+                console.error('Error deleting post:', error);
+            }
         });
 
+        // Edit button
         const editBtn = document.createElement('button');
         editBtn.classList.add('edit-icon');
         editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-        editBtn.addEventListener('click', () => {
+        editBtn.addEventListener('click', async () => {
             const updatedTitle = prompt('Edit the title:', post.title);
             const updatedContent = prompt('Edit the content:', post.content);
 
-            if (updatedTitle !== null) post.title = updatedTitle;
-            if (updatedContent !== null) post.content = updatedContent;
+            if (updatedTitle !== null && updatedContent !== null) {
+                post.title = updatedTitle;
+                post.content = updatedContent;
 
-            postTitle.textContent = post.title;
-            postContent.textContent = post.content;
+                try {
+                    await fetch(`${API_URL}/posts/${post._id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title: updatedTitle, content: updatedContent })
+                    });
 
-            const updatedPosts = savedPosts.map(p => p.id === post.id ? post : p);
-            localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
+                    postTitle.textContent = post.title;
+                    postContent.textContent = post.content;
+                } catch (error) {
+                    console.error('Error updating post:', error);
+                }
+            }
         });
 
+        // Like button
         const likeBtn = document.createElement('button');
         likeBtn.classList.add('like-icon');
         likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
@@ -100,21 +123,20 @@ document.addEventListener('DOMContentLoaded', () => {
         likeCounter.classList.add('like-counter');
         likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
 
-        likeBtn.addEventListener('click', () => {
-            if (post.liked) {
-                post.likes -= 1;
-                post.liked = false;
-                likeBtn.classList.remove('liked');
-            } else {
-                post.likes += 1;
-                post.liked = true;
-                likeBtn.classList.add('liked');
+        likeBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
+                    method: 'POST'
+                });
+                const updatedPost = await response.json();
+                post.likes = updatedPost.likes;
+                post.liked = !post.liked;
+
+                likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
+                likeBtn.classList.toggle('liked');
+            } catch (error) {
+                console.error('Error liking post:', error);
             }
-
-            likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
-
-            const updatedPosts = savedPosts.map(p => p.id === post.id ? post : p);
-            localStorage.setItem('blogPosts', JSON.stringify(updatedPosts));
         });
 
         actionsDiv.appendChild(editBtn);
@@ -129,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
         postsContainer.prepend(postDiv);
     }
 
+    // Clear form inputs after submission
     function clearForm() {
         titleInput.value = '';
         contentInput.value = '';
