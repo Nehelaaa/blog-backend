@@ -6,10 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
     const newPostForm = document.getElementById('new-post');
-    const loginModal = document.getElementById('login-modal');
-    const loginSubmitBtn = document.getElementById('login-submit');
     const profileIcon = document.getElementById('profile-icon');
-    const closeModal = document.querySelector('.close');
+    const logoutBtn = document.getElementById('logout-btn');
+    let token = '';  // Store token or session
 
     let loggedIn = false;
 
@@ -19,20 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display posts from backend when the page loads
     fetchPosts();
 
-    // Profile icon click opens login modal
-    profileIcon.addEventListener('click', () => {
-        loginModal.style.display = 'block';
-    });
-
-    // Close modal logic
-    closeModal.addEventListener('click', () => {
-        loginModal.style.display = 'none';
-    });
-
-    // Login logic when login form is submitted
-    loginSubmitBtn.addEventListener('click', async () => {
-        const username = document.getElementById('modal-username').value;
-        const password = document.getElementById('modal-password').value;
+    // Login logic (Now with modal and authentication)
+    profileIcon.addEventListener('click', async () => {
+        const username = prompt('Enter username');
+        const password = prompt('Enter password');
 
         try {
             const response = await fetch(`${API_URL}/login`, {
@@ -42,10 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
+                const data = await response.json();
+                token = data.token;  // Assuming the server responds with a token
                 alert('Login successful');
                 loggedIn = true;
                 toggleLoginState();
-                loginModal.style.display = 'none'; // Close the modal after login
             } else {
                 alert('Invalid username or password');
             }
@@ -54,13 +44,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Logout logic
+    logoutBtn.addEventListener('click', () => {
+        loggedIn = false;
+        token = '';  // Clear the token on logout
+        toggleLoginState();
+    });
+
     // Toggle between login and logout state
     function toggleLoginState() {
         if (loggedIn) {
             newPostForm.style.display = 'block'; // Show the post form for Donia
+            profileIcon.style.display = 'none';
+            logoutBtn.style.display = 'block';
             showEditAndDeleteButtons(); // Enable edit and delete buttons for logged-in user
         } else {
             newPostForm.style.display = 'none'; // Hide the post form for public
+            profileIcon.style.display = 'block';
+            logoutBtn.style.display = 'none';
             hideEditAndDeleteButtons(); // Disable edit and delete buttons for public users
         }
     }
@@ -79,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`  // Pass the token in the request headers
+                },
                 body: formData
             });
 
@@ -142,7 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
         likeBtn.addEventListener('click', async () => {
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`  // Token for authentication
+                    }
                 });
 
                 if (!response.ok) {
@@ -174,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsDiv.appendChild(likeCounter);
         actionsDiv.appendChild(commentBtn);
 
-        // Add edit and delete buttons for logged-in user
         if (loggedIn) {
             const editBtn = document.createElement('button');
             editBtn.classList.add('edit-icon');
@@ -205,14 +211,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to edit post (logic to be implemented)
     function editPost(postId) {
         alert(`Edit post: ${postId}`);
-        // You can add the logic for fetching the post data and populating the form for editing.
+        // Logic for editing the post.
     }
 
     // Function to delete post
     async function deletePost(postId) {
         try {
             const response = await fetch(`${API_URL}/posts/${postId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (!response.ok) {
@@ -239,6 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const editIcons = document.querySelectorAll('.edit-icon');
         const deleteIcons = document.querySelectorAll('.delete-icon');
         editIcons.forEach(icon => icon.style.display = 'none');
-        deleteIcons.forEach(icon => icon.style.display = 'none');
+        deleteIcons.forEach icon => icon.style.display = 'none');
     }
 });
