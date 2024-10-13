@@ -197,12 +197,13 @@
 /* Post Actions Styling */
 .post-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-around;
     align-items: center;
     gap: 10px;
     position: absolute;
     right: 15px;
     bottom: 15px;
+    flex-wrap: wrap;  /* Allow icons to wrap on mobile */
 }
 
 .post-actions button {
@@ -214,7 +215,8 @@
 
 .post-actions .delete-icon,
 .post-actions .edit-icon,
-.post-actions .like-icon {
+.post-actions .like-icon,
+.post-actions .comment-icon {
     color: var(--primary-color);
     transition: color 0.3s ease;
 }
@@ -252,7 +254,22 @@
     margin-bottom: 10px;
 }
 
-/* RESPONSIVE DESIGN */
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+}
+
+.hamburger div {
+    width: 25px;
+    height: 3px;
+    background-color: var(--primary-color);
+    margin: 5px 0;
+}
+
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 36px;
@@ -269,6 +286,27 @@
     .navbar .menu {
         flex-direction: column;
         gap: 10px;
+        display: none;
+        background-color: var(--white);
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .navbar .menu.active {
+        display: flex;
+    }
+
+    .navbar .menu a {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .hamburger {
+        display: flex;
     }
 
     #posts-container {
