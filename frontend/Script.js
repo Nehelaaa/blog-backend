@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
 
+    // Check if the DOM content is loaded
+    console.log('DOM Content Loaded');
+
     // Fetch and display posts from backend when the page loads
     fetchPosts();
 
@@ -13,12 +16,16 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        console.log('Form submitted');
+
         const formData = new FormData();
         formData.append('title', titleInput.value);
         formData.append('content', contentInput.value);
         if (imageInput.files.length > 0) {
             formData.append('image', imageInput.files[0]);
         }
+
+        console.log('Form data:', formData);
 
         try {
             const response = await fetch(`${API_URL}/posts`, {
@@ -31,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const newPost = await response.json();
+            console.log('Post created:', newPost);
+
             displayPost(newPost);
             clearForm();
         } catch (error) {
@@ -46,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to fetch posts');
             }
             const posts = await response.json();
+            console.log('Posts fetched:', posts);
             posts.forEach(post => displayPost(post));
         } catch (error) {
             console.error('Error fetching posts:', error);
