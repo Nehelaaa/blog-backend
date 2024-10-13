@@ -15,11 +15,11 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "express-session": "^1.17.3",  // Added express-session for session management
+    "express-session": "^1.17.3", 
     "mongoose": "^8.7.1",
     "multer": "^1.4.4"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"  // Added nodemon for automatic server restarts during development
+    "nodemon": "^3.0.1"  
   }
 }
