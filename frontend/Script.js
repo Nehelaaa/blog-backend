@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
+        // Create FormData object to handle file uploads
         const formData = new FormData();
         formData.append('title', titleInput.value);
         formData.append('content', contentInput.value);
