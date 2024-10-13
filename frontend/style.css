@@ -56,6 +56,7 @@
     color: var(--secondary-color);
 }
 
+/* Hero Banner */
 .hero {
     background: url('https://assets.onecompiler.app/42ubzb7su/42ubxcwew/haydon-sn_GTCzcBqo-unsplash.jpg') no-repeat center center/cover;
     height: 70vh;
@@ -192,7 +193,6 @@
     border-radius: 8px;
     margin-bottom: 10px;
 }
-
 
 /* Post Actions Styling */
 .post-actions {
