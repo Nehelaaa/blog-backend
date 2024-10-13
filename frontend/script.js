@@ -81,12 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             newPostForm.style.display = 'block'; // Show the post form for logged-in users
             profileIcon.style.display = 'none';  // Hide profile icon when logged in
             logoutBtn.style.display = 'block';   // Show logout button
-            showEditAndDeleteButtons();  // Enable edit and delete buttons for logged-in user
         } else {
             newPostForm.style.display = 'none';  // Hide the post form for public users
             profileIcon.style.display = 'block';  // Show profile icon
             logoutBtn.style.display = 'none';     // Hide logout button
-            hideEditAndDeleteButtons();  // Disable edit and delete buttons for public users
         }
     }
 
@@ -104,9 +102,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Add post logic
+    // Add post logic (Updated with preventDefault and token authentication)
     form.addEventListener('submit', async (e) => {
-        e.preventDefault();  // Prevent the default form submission
+        e.preventDefault();  // Prevent the default form submission (page reload)
 
         const formData = new FormData();
         formData.append('title', titleInput.value);
@@ -124,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const newPost = await response.json();
-                displayPost(newPost);
+                displayPost(newPost);  // Add the new post to the display
                 form.reset();  // Clear the form after adding post
             } else {
                 alert('Failed to add post');
@@ -232,21 +230,5 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error deleting post:', error);
         }
-    }
-
-    // Show edit and delete buttons for logged-in users
-    function showEditAndDeleteButtons() {
-        const editIcons = document.querySelectorAll('.edit-icon');
-        const deleteIcons = document.querySelectorAll('.delete-icon');
-        editIcons.forEach(icon => icon.style.display = 'block');
-        deleteIcons.forEach(icon => icon.style.display = 'block');
-    }
-
-    // Hide edit and delete buttons for public users
-    function hideEditAndDeleteButtons() {
-        const editIcons = document.querySelectorAll('.edit-icon');
-        const deleteIcons = document.querySelectorAll('.delete-icon');
-        editIcons.forEach(icon => icon.style.display = 'none');
-        deleteIcons.forEach(icon => icon.style.display = 'none');
     }
 });
