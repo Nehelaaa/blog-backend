@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const imageInput = document.getElementById('blog-image');
     const postsContainer = document.getElementById('posts-container');
     const newPostForm = document.getElementById('new-post');
-    const profileIcon = document.getElementById('profile-icon');
+    const profileIcon = document.getElementById('profile-icon'); // Ensure this ID matches HTML
     const logoutBtn = document.getElementById('logout-btn');
     let token = '';  // Store token or session
 
@@ -16,13 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
     newPostForm.style.display = 'none';
 
     // Fetch and display posts from backend when the page loads
-    fetchPosts();
+    fetchPosts();  // Ensure posts are fetched for everyone
 
-    // Login logic (Now with modal and authentication)
-    profileIcon.addEventListener('click', async () => {
+    // Login logic
+    profileIcon.addEventListener('click', () => {
+        // Display modal to enter username and password
         const username = prompt('Enter username');
         const password = prompt('Enter password');
 
+        login(username, password);
+    });
+
+    async function login(username, password) {
         try {
             const response = await fetch(`${API_URL}/login`, {
                 method: 'POST',
@@ -32,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 const data = await response.json();
-                token = data.token;  // Assuming the server responds with a token
+                token = data.token;  // Store the token for further authenticated requests
                 alert('Login successful');
                 loggedIn = true;
                 toggleLoginState();
@@ -42,63 +47,31 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error during login:', error);
         }
-    });
+    }
 
     // Logout logic
     logoutBtn.addEventListener('click', () => {
         loggedIn = false;
-        token = '';  // Clear the token on logout
+        token = '';  // Clear token on logout
         toggleLoginState();
     });
 
     // Toggle between login and logout state
     function toggleLoginState() {
         if (loggedIn) {
-            newPostForm.style.display = 'block'; // Show the post form for Donia
-            profileIcon.style.display = 'none';
-            logoutBtn.style.display = 'block';
-            showEditAndDeleteButtons(); // Enable edit and delete buttons for logged-in user
+            newPostForm.style.display = 'block'; // Show the post form for logged-in users
+            profileIcon.style.display = 'none';  // Hide profile icon when logged in
+            logoutBtn.style.display = 'block';   // Show logout button
+            showEditAndDeleteButtons();  // Enable edit and delete buttons for logged-in user
         } else {
-            newPostForm.style.display = 'none'; // Hide the post form for public
-            profileIcon.style.display = 'block';
-            logoutBtn.style.display = 'none';
-            hideEditAndDeleteButtons(); // Disable edit and delete buttons for public users
+            newPostForm.style.display = 'none';  // Hide the post form for public
+            profileIcon.style.display = 'block';  // Show profile icon
+            logoutBtn.style.display = 'none';     // Hide logout button
+            hideEditAndDeleteButtons();  // Disable edit and delete buttons for public users
         }
     }
 
-    // Form submission event to create a new post
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const formData = new FormData();
-        formData.append('title', titleInput.value);
-        formData.append('content', contentInput.value);
-        if (imageInput.files.length > 0) {
-            formData.append('image', imageInput.files[0]);
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/posts`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`  // Pass the token in the request headers
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create post');
-            }
-
-            const newPost = await response.json();
-            displayPost(newPost);
-            clearForm();
-        } catch (error) {
-            console.error('Error creating post:', error);
-        }
-    });
-
-    // Fetch posts from the backend and display them
+    // Fetch posts from the backend and display them for public and logged-in users
     async function fetchPosts() {
         try {
             const response = await fetch(`${API_URL}/posts`);
@@ -106,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to fetch posts');
             }
             const posts = await response.json();
-            posts.forEach(post => displayPost(post));
+            posts.forEach(post => displayPost(post));  // Display posts for everyone
         } catch (error) {
             console.error('Error fetching posts:', error);
         }
@@ -147,9 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`  // Token for authentication
-                    }
+                    headers: loggedIn ? { 'Authorization': `Bearer ${token}` } : {}
                 });
 
                 if (!response.ok) {
@@ -165,33 +136,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Comment button
-        const commentBtn = document.createElement('button');
-        commentBtn.classList.add('comment-icon');
-        commentBtn.innerHTML = '<i class="fas fa-comments"></i>';
-        const commentsDiv = document.createElement('div');
-        commentsDiv.classList.add('comments-section');
-        commentsDiv.style.display = 'none';  // Initially hide comments section
-
-        commentBtn.addEventListener('click', () => {
-            commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none';  // Toggle visibility
-        });
-
         actionsDiv.appendChild(likeBtn);
         actionsDiv.appendChild(likeCounter);
-        actionsDiv.appendChild(commentBtn);
 
+        // Add edit and delete buttons if logged in
         if (loggedIn) {
             const editBtn = document.createElement('button');
             editBtn.classList.add('edit-icon');
             editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-            editBtn.addEventListener('click', () => editPost(post._id)); // Edit post logic
+            editBtn.addEventListener('click', () => editPost(post._id));  // Edit post logic
             actionsDiv.appendChild(editBtn);
 
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('delete-icon');
             deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-            deleteBtn.addEventListener('click', () => deletePost(post._id)); // Delete post logic
+            deleteBtn.addEventListener('click', () => deletePost(post._id));  // Delete post logic
             actionsDiv.appendChild(deleteBtn);
         }
 
@@ -211,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to edit post (logic to be implemented)
     function editPost(postId) {
         alert(`Edit post: ${postId}`);
-        // Logic for editing the post.
+        // Logic for editing the post can be added here
     }
 
     // Function to delete post
@@ -219,9 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/posts/${postId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
 
             if (!response.ok) {
@@ -229,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             alert('Post deleted successfully');
-            location.reload(); // Reload the page to refresh posts
+            location.reload();  // Reload the page to refresh posts
         } catch (error) {
             console.error('Error deleting post:', error);
         }
@@ -248,6 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const editIcons = document.querySelectorAll('.edit-icon');
         const deleteIcons = document.querySelectorAll('.delete-icon');
         editIcons.forEach(icon => icon.style.display = 'none');
-        deleteIcons.forEach icon => icon.style.display = 'none');
+        deleteIcons.forEach(icon => icon.style.display = 'none');
     }
 });
