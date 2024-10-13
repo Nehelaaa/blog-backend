@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        // Create FormData object to handle file uploads
         const formData = new FormData();
         formData.append('title', titleInput.value);
         formData.append('content', contentInput.value);
@@ -55,8 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Display a single post
     function displayPost(post) {
-        console.log('Displaying post:', post);  // Debugging: check post data
-
         const postDiv = document.createElement('div');
         postDiv.classList.add('post');
 
@@ -78,12 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const actionsDiv = document.createElement('div');
         actionsDiv.classList.add('post-actions');
 
-        // Delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('delete-icon');
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
         deleteBtn.addEventListener('click', async () => {
-            console.log('Deleting post with ID:', post._id);
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}`, {
                     method: 'DELETE'
@@ -97,12 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Edit button
         const editBtn = document.createElement('button');
         editBtn.classList.add('edit-icon');
         editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
         editBtn.addEventListener('click', async () => {
-            console.log('Editing post with ID:', post._id);
             const updatedTitle = prompt('Edit the title:', post.title);
             const updatedContent = prompt('Edit the content:', post.content);
 
@@ -131,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Like button
         const likeBtn = document.createElement('button');
         likeBtn.classList.add('like-icon');
         likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i>';
@@ -143,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
         likeCounter.textContent = `${post.likes} like${post.likes !== 1 ? 's' : ''}`;
 
         likeBtn.addEventListener('click', async () => {
-            console.log('Liking post with ID:', post._id);
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
                     method: 'POST'
