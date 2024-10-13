@@ -9,13 +9,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Storage configuration for `multer`
+// Storage configuration for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));  // e.g., 1619479123797.jpg
+        cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
@@ -51,7 +51,7 @@ app.post('/posts', upload.single('image'), async (req, res) => {
         const newPost = new Post({
             title: req.body.title,
             content: req.body.content,
-            image: req.file ? req.file.path : null  // Save image path if file is uploaded
+            image: req.file ? req.file.path : null
         });
         await newPost.save();
         res.status(201).json(newPost);
@@ -99,6 +99,19 @@ app.post('/posts/:id/comment', async (req, res) => {
     } catch (error) {
         console.error('Error adding comment:', error);
         res.status(500).json({ error: 'Failed to add comment' });
+    }
+});
+
+// Delete a post
+app.delete('/posts/:id', async (req, res) => {
+    try {
+        const post = await Post.findByIdAndDelete(req.params.id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+        
+        res.status(200).json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        res.status(500).json({ error: 'Failed to delete post' });
     }
 });
 
