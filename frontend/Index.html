@@ -44,9 +44,9 @@
         <!-- Form to add a new blog post -->
         <div id="new-post">
             <form id="blog-form" enctype="multipart/form-data">
-                <input type="text" id="blog-title" placeholder="Blog Title" required>
-                <textarea id="blog-content" rows="5" placeholder="Write about your experience..." required></textarea>
-                <input type="file" id="blog-image" accept="image/*">
+                <input type="text" id="blog-title" name="title" placeholder="Blog Title" required>
+                <textarea id="blog-content" name="content" rows="5" placeholder="Write about your experience..." required></textarea>
+                <input type="file" id="blog-image" name="image" accept="image/*">
                 <button type="submit" id="submit-button">Add Post</button>
             </form>
         </div>
