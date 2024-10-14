@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`  // Pass the token for authentication
                 },
                 body: formData
             });
@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newPost = await response.json();
                 displayPost(newPost);  // Add the new post to the display
                 form.reset();  // Clear the form after adding post
+                alert('Post added successfully!');  // Provide feedback to user
             } else {
                 alert('Failed to add post');
             }
@@ -204,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         postDiv.appendChild(postTitle);
         postDiv.appendChild(postContent);
         postDiv.appendChild(actionsDiv);
-        postsContainer.prepend(postDiv);
+        postsContainer.prepend(postDiv);  // Add the new post to the top of the container
     }
 
     // Function to edit post (logic to be implemented)
