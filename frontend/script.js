@@ -14,6 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let loggedIn = false;
 
+    // Check if all necessary elements are present before proceeding
+    if (!form || !newPostForm || !profileIcon || !loginModal || !loginSubmitBtn || !logoutBtn) {
+        console.error('One or more required elements are missing from the DOM.');
+        return;
+    }
+
     // Hide posting form initially for public users
     newPostForm.style.display = 'none';
 
@@ -77,14 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Toggle between login and logout state
     function toggleLoginState() {
-        if (loggedIn) {
-            newPostForm.style.display = 'block'; // Show the post form for logged-in users
-            profileIcon.style.display = 'none';  // Hide profile icon when logged in
-            logoutBtn.style.display = 'block';   // Show logout button
+        if (newPostForm && profileIcon && logoutBtn) {
+            if (loggedIn) {
+                newPostForm.style.display = 'block'; // Show the post form for logged-in users
+                profileIcon.style.display = 'none';  // Hide profile icon when logged in
+                logoutBtn.style.display = 'block';   // Show logout button
+            } else {
+                newPostForm.style.display = 'none';  // Hide the post form for public users
+                profileIcon.style.display = 'block';  // Show profile icon
+                logoutBtn.style.display = 'none';     // Hide logout button
+            }
         } else {
-            newPostForm.style.display = 'none';  // Hide the post form for public users
-            profileIcon.style.display = 'block';  // Show profile icon
-            logoutBtn.style.display = 'none';     // Hide logout button
+            console.error('Cannot toggle login state. Missing elements.');
         }
     }
 
@@ -109,7 +119,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('title', titleInput.value);
         formData.append('content', contentInput.value);
-        formData.append('image', imageInput.files[0]);
+        if (imageInput.files.length > 0) {
+            formData.append('image', imageInput.files[0]);
+        }
 
         try {
             const response = await fetch(`${API_URL}/posts`, {
