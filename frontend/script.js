@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch(`${API_URL}/posts`, {
                     method: 'POST',
                     headers: {
-                        'Session-Token': token  // Use the token as Session-Token
+                        'Authorization': `Bearer ${token}`  // Use the token as Bearer token
                     },
                     body: formData
                 });
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_URL}/posts/${post._id}/like`, {
                     method: 'POST',
-                    headers: { 'Session-Token': token }
+                    headers: { 'Authorization': `Bearer ${token}` }  // Add token to headers
                 });
 
                 if (!response.ok) throw new Error('Failed to like post');
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${API_URL}/posts/${postId}`, {
                 method: 'DELETE',
-                headers: { 'Session-Token': token }
+                headers: { 'Authorization': `Bearer ${token}` }  // Add token to headers
             });
 
             if (!response.ok) throw new Error('Failed to delete post');
