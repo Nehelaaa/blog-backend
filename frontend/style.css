@@ -52,8 +52,13 @@
     padding: 10px 15px;
 }
 
-.navbar .menu a:hover {
+.navbar .menu a:hover, .navbar .menu a:focus {
     color: var(--secondary-color);
+    outline: none;
+}
+
+.navbar .menu a:focus {
+    outline: 2px solid var(--secondary-color);
 }
 
 /* Profile Icon */
@@ -106,6 +111,10 @@
 
 .cta-button:hover {
     background-color: #e73370;
+}
+
+.cta-button:focus {
+    outline: 2px solid #e73370;
 }
 
 /* General Section Styling */
@@ -162,6 +171,10 @@
 
 #blog-form button:hover, #contact-form button:hover {
     background-color: #e73370;
+}
+
+#blog-form button:focus, #contact-form button:focus {
+    outline: 2px solid #e73370;
 }
 
 /* Blog Post Styling */
