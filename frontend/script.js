@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 const data = await response.json();
                 token = data.token;  // Store the token for further authenticated requests
+                console.log('Token received:', token);  // Debugging the token reception
                 alert('Login successful');
                 loggedIn = true;
                 loginModal.style.display = 'none';  // Hide login modal after successful login
@@ -141,10 +142,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     form.reset();  // Clear the form after adding post
                     alert('Post added successfully!');  // Provide feedback to user
                 } else {
-                    alert('Failed to add post');
+                    const errorData = await response.json();
+                    console.error('Failed to add post:', errorData.message);
+                    alert(`Failed to add post: ${errorData.message}`);
                 }
             } catch (error) {
                 console.error('Error adding post:', error);
+                alert('Error adding post. Please check the console for more details.');
             }
         });
     }
