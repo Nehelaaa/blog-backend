@@ -73,7 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginModal.style.display = 'none';  // Hide login modal after successful login
                 toggleLoginState();
             } else {
-                alert('Invalid username or password');
+                const errorData = await response.json();
+                alert(`Login failed: ${errorData.message}`);
             }
         } catch (error) {
             console.error('Error during login:', error);
