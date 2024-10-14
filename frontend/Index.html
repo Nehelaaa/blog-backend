@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donia Awadallah's Blog</title>
     <link rel="stylesheet" href="style.css">
@@ -76,8 +80,8 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h3>Login</h3>
-            <input type="text" id="modal-username" placeholder="Username">
-            <input type="password" id="modal-password" placeholder="Password" onkeydown="if(event.key === 'Enter'){document.getElementById('login-submit').click()}"> <!-- Password input with hidden feature -->
+            <input type="text" id="modal-username" placeholder="Username" required>
+            <input type="password" id="modal-password" placeholder="Password" required onkeydown="if(event.key === 'Enter'){document.getElementById('login-submit').click()}"> <!-- Password input with "Enter" submit -->
             <button id="login-submit" class="pink-button">Login</button> <!-- Pink button for login -->
         </div>
     </div>
