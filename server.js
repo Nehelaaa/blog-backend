@@ -24,8 +24,13 @@ app.use(session({
 
 // Middleware to check if the user is authenticated
 function isAuthenticated(req, res, next) {
-    if (req.session && req.session.user) {
-        return next();  // Proceed if authenticated
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+        const sessionId = req.headers.authorization.split(' ')[1];
+        if (req.sessionID === sessionId) {
+            return next();  // Proceed if authenticated
+        } else {
+            return res.status(401).json({ error: 'Unauthorized. Invalid session ID.' });
+        }
     } else {
         return res.status(401).json({ error: 'Unauthorized. Please log in first.' });
     }
