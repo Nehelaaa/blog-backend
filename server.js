@@ -179,7 +179,7 @@ app.post('/login', (req, res) => {
 
     if (username === hardcodedUsername && password === hardcodedPassword) {
         req.session.user = username;  // Store the username in session
-        return res.status(200).json({ message: 'Login successful' });
+        return res.status(200).json({ message: 'Login successful', token: req.sessionID });  // Return session ID as token
     } else {
         return res.status(401).json({ message: 'Invalid username or password' });
     }
