@@ -14,42 +14,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let loggedIn = false;
 
-    // Check if all necessary elements are present before proceeding
-    if (!form || !newPostForm || !profileIcon || !loginModal || !loginSubmitBtn || !logoutBtn) {
-        console.error('One or more required elements are missing from the DOM.');
-        return;
-    }
-
     // Hide posting form initially for public users
-    newPostForm.style.display = 'none';
+    if (newPostForm) newPostForm.style.display = 'none';
 
     // Fetch and display posts from backend when the page loads
     fetchPosts();  // Ensure posts are fetched for everyone
 
     // Profile Icon triggers login modal
-    profileIcon.addEventListener('click', () => {
-        loginModal.style.display = 'block';
-    });
+    if (profileIcon) {
+        profileIcon.addEventListener('click', () => {
+            if (loginModal) {
+                loginModal.style.display = 'block';
+            }
+        });
+    }
 
     // Close login modal
-    document.querySelector('.close').addEventListener('click', () => {
-        loginModal.style.display = 'none';
-    });
+    const closeModal = document.querySelector('.close');
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+    }
 
     // Login logic
-    loginSubmitBtn.addEventListener('click', async () => {
-        const username = document.getElementById('modal-username').value;
-        const password = document.getElementById('modal-password').value;
+    if (loginSubmitBtn) {
+        loginSubmitBtn.addEventListener('click', async () => {
+            const username = document.getElementById('modal-username').value;
+            const password = document.getElementById('modal-password').value;
 
-        await login(username, password);
-    });
+            await login(username, password);
+        });
+    }
 
     // Trigger login on 'Enter' keypress in password field
-    document.getElementById('modal-password').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            loginSubmitBtn.click();
-        }
-    });
+    const passwordField = document.getElementById('modal-password');
+    if (passwordField) {
+        passwordField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                loginSubmitBtn.click();
+            }
+        });
+    }
 
     async function login(username, password) {
         try {
@@ -75,26 +81,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Logout logic
-    logoutBtn.addEventListener('click', () => {
-        loggedIn = false;
-        token = '';  // Clear token on logout
-        toggleLoginState();
-    });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            loggedIn = false;
+            token = '';  // Clear token on logout
+            toggleLoginState();
+        });
+    }
 
     // Toggle between login and logout state
     function toggleLoginState() {
-        if (newPostForm && profileIcon && logoutBtn) {
-            if (loggedIn) {
-                newPostForm.style.display = 'block'; // Show the post form for logged-in users
-                profileIcon.style.display = 'none';  // Hide profile icon when logged in
-                logoutBtn.style.display = 'block';   // Show logout button
-            } else {
-                newPostForm.style.display = 'none';  // Hide the post form for public users
-                profileIcon.style.display = 'block';  // Show profile icon
-                logoutBtn.style.display = 'none';     // Hide logout button
-            }
+        if (loggedIn) {
+            if (newPostForm) newPostForm.style.display = 'block'; // Show the post form for logged-in users
+            if (profileIcon) profileIcon.style.display = 'none';  // Hide profile icon when logged in
+            if (logoutBtn) logoutBtn.style.display = 'block';   // Show logout button
         } else {
-            console.error('Cannot toggle login state. Missing elements.');
+            if (newPostForm) newPostForm.style.display = 'none';  // Hide the post form for public users
+            if (profileIcon) profileIcon.style.display = 'block';  // Show profile icon
+            if (logoutBtn) logoutBtn.style.display = 'none';     // Hide logout button
         }
     }
 
@@ -106,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Failed to fetch posts');
             }
             const posts = await response.json();
+            postsContainer.innerHTML = '';  // Clear existing posts
             posts.forEach(post => displayPost(post));  // Display posts for everyone
         } catch (error) {
             console.error('Error fetching posts:', error);
@@ -113,37 +118,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Add post logic (Updated with preventDefault and token authentication)
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();  // Prevent the default form submission (page reload)
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();  // Prevent the default form submission (page reload)
 
-        const formData = new FormData();
-        formData.append('title', titleInput.value);
-        formData.append('content', contentInput.value);
-        if (imageInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append('title', titleInput.value);
+            formData.append('content', contentInput.value);
             formData.append('image', imageInput.files[0]);
-        }
 
-        try {
-            const response = await fetch(`${API_URL}/posts`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`  // Pass the token for authentication
-                },
-                body: formData
-            });
+            try {
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`  // Pass the token for authentication
+                    },
+                    body: formData
+                });
 
-            if (response.ok) {
-                const newPost = await response.json();
-                displayPost(newPost);  // Add the new post to the display
-                form.reset();  // Clear the form after adding post
-                alert('Post added successfully!');  // Provide feedback to user
-            } else {
-                alert('Failed to add post');
+                if (response.ok) {
+                    const newPost = await response.json();
+                    displayPost(newPost);  // Add the new post to the display
+                    form.reset();  // Clear the form after adding post
+                    alert('Post added successfully!');  // Provide feedback to user
+                } else {
+                    alert('Failed to add post');
+                }
+            } catch (error) {
+                console.error('Error adding post:', error);
             }
-        } catch (error) {
-            console.error('Error adding post:', error);
-        }
-    });
+        });
+    }
 
     // Display a single post
     function displayPost(post) {
