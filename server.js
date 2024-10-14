@@ -10,11 +10,16 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Initialize session middleware
+// Initialize session middleware with enhanced security options
 app.use(session({
     secret: process.env.SESSION_SECRET || 'supersecretkey',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,  // Prevents client-side JS from reading the cookie
+        secure: process.env.NODE_ENV === 'production',  // Only send cookie over HTTPS in production
+        sameSite: 'strict'  // Helps prevent CSRF attacks
+    }
 }));
 
 // Middleware to check if the user is authenticated
@@ -22,11 +27,11 @@ function isAuthenticated(req, res, next) {
     if (req.session && req.session.user) {
         return next();  // Proceed if authenticated
     } else {
-        return res.status(401).json({ error: 'Unauthorized' });  // Unauthorized error if not logged in
+        return res.status(401).json({ error: 'Unauthorized. Please log in first.' });
     }
 }
 
-// Storage configuration for multer
+// Storage configuration for multer (file uploads)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/');
@@ -39,7 +44,7 @@ const storage = multer.diskStorage({
 // Initialize multer with the defined storage
 const upload = multer({ storage: storage });
 
-// Connect to MongoDB using the connection string in .env
+// Connect to MongoDB using the connection string from .env
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -74,7 +79,7 @@ app.post('/posts', isAuthenticated, upload.single('image'), async (req, res) => 
         res.status(201).json(newPost);
     } catch (error) {
         console.error('Error creating post:', error);
-        res.status(500).json({ error: 'Failed to create post' });
+        res.status(500).json({ error: 'Failed to create post. Please try again later.' });
     }
 });
 
@@ -85,7 +90,7 @@ app.get('/posts', async (req, res) => {
         res.status(200).json(posts);
     } catch (error) {
         console.error('Error fetching posts:', error);
-        res.status(500).json({ error: 'Failed to fetch posts' });
+        res.status(500).json({ error: 'Failed to fetch posts. Please try again later.' });
     }
 });
 
@@ -100,7 +105,7 @@ app.post('/posts/:id/like', async (req, res) => {
         res.status(200).json(post);
     } catch (error) {
         console.error('Error liking post:', error);
-        res.status(500).json({ error: 'Failed to like post' });
+        res.status(500).json({ error: 'Failed to like post. Please try again later.' });
     }
 });
 
@@ -115,7 +120,7 @@ app.post('/posts/:id/comment', async (req, res) => {
         res.status(200).json(post);
     } catch (error) {
         console.error('Error adding comment:', error);
-        res.status(500).json({ error: 'Failed to add comment' });
+        res.status(500).json({ error: 'Failed to add comment. Please try again later.' });
     }
 });
 
@@ -132,7 +137,7 @@ app.put('/posts/:id', isAuthenticated, async (req, res) => {
         res.status(200).json(post);
     } catch (error) {
         console.error('Error updating post:', error);
-        res.status(500).json({ error: 'Failed to update post' });
+        res.status(500).json({ error: 'Failed to update post. Please try again later.' });
     }
 });
 
@@ -145,12 +150,12 @@ app.delete('/posts/:id', isAuthenticated, async (req, res) => {
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         console.error('Error deleting post:', error);
-        res.status(500).json({ error: 'Failed to delete post' });
+        res.status(500).json({ error: 'Failed to delete post. Please try again later.' });
     }
 });
 
 // Serve uploaded images statically
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Create login route
 app.post('/login', (req, res) => {
