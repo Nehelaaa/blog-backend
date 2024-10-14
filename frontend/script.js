@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginSubmitBtn = document.getElementById('login-submit');
     const logoutBtn = document.getElementById('logout-btn');
     let token = '';  // Store token or session
-
     let loggedIn = false;
 
     // Hide posting form initially for public users
