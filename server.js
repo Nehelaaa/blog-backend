@@ -75,14 +75,12 @@ const Post = mongoose.model('Post', postSchema);
 // Create a new post with image upload (only accessible to authenticated users)
 app.post('/posts', isAuthenticated, upload.single('image'), async (req, res) => {
     try {
-        // Log incoming data
         console.log('Creating post:', {
             title: req.body.title,
             content: req.body.content,
             image: req.file ? req.file.filename : 'No image'
         });
 
-        // Validate required fields
         if (!req.body.title || !req.body.content) {
             return res.status(400).json({ error: 'Title and content are required.' });
         }
