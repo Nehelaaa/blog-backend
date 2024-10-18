@@ -88,7 +88,7 @@ app.post('/posts', isAuthenticated, upload.single('image'), async (req, res) => 
         const newPost = new Post({
             title: req.body.title,
             content: req.body.content,
-            image: req.file ? req.file.path : null
+            image: req.file ? `/uploads/${req.file.filename}` : null
         });
         await newPost.save();
         res.status(201).json(newPost);
